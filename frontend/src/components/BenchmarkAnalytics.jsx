@@ -21,6 +21,8 @@ export default function BenchmarkAnalytics() {
   const [hoveredRocPoint, setHoveredRocPoint] = useState(null);
   const [hoveredAucBar, setHoveredAucBar] = useState(null);
   const [showChanceLine, setShowChanceLine] = useState(true);
+  const [hoveredCompareBar, setHoveredCompareBar] = useState(null);
+
 
   useEffect(() => {
     fetch('/api/benchmark')
@@ -474,6 +476,279 @@ export default function BenchmarkAnalytics() {
             ))}
           </div>
         </div>
+
+        {/* ============================================================== */}
+        {/* COMPARATIVE MODEL BENCHMARK (BAR GRAPH)                        */}
+        {/* ============================================================== */}
+        <div className="panel" style={{ 
+          background: '#070a13', 
+          borderColor: '#192233', 
+          borderRadius: '16px',
+          padding: '1.6rem 2rem',
+          marginBottom: '2rem',
+          boxShadow: '0 20px 40px -15px rgba(0, 0, 0, 0.5)',
+          position: 'relative'
+        }}>
+          {/* Header with Title & Legend */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between', 
+            marginBottom: '1.4rem',
+            flexWrap: 'wrap',
+            gap: '1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ 
+                width: '38px', 
+                height: '38px', 
+                borderRadius: '10px', 
+                background: 'rgba(56, 189, 248, 0.12)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                border: '1px solid rgba(56, 189, 248, 0.25)'
+              }}>
+                <BarChart3 size={20} color="#38bdf8" />
+              </div>
+              <div>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.01em', margin: 0 }}>
+                  Comparative Model Benchmark
+                </h3>
+                <p style={{ fontSize: '0.84rem', color: '#64748b', marginTop: '2px', margin: 0 }}>
+                  Baseline vs. Bagging vs. Boosting classification performance
+                </p>
+              </div>
+            </div>
+
+            {/* Legend (Baseline, Bagging, Boosting) */}
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '18px', 
+              flexWrap: 'wrap',
+              background: 'rgba(15, 23, 42, 0.6)',
+              padding: '8px 16px',
+              borderRadius: '10px',
+              border: '1px solid #1e293b'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#38bdf8', display: 'inline-block' }} />
+                <span><strong style={{ color: '#38bdf8' }}>Baseline</strong> (Logistic Regression)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#a78bfa', display: 'inline-block' }} />
+                <span><strong style={{ color: '#a78bfa' }}>Bagging</strong> (Random Forest)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#fbbf24', display: 'inline-block' }} />
+                <span><strong style={{ color: '#fbbf24' }}>Boosting</strong> (AdaBoost)</span>
+              </div>
+            </div>
+          </div>
+
+          {/* SVG Grouped Bar Chart Canvas */}
+          <div style={{ width: '100%', overflowX: 'auto' }}>
+            <svg 
+              viewBox="0 0 920 380" 
+              style={{ width: '100%', height: 'auto', minWidth: '650px', display: 'block', overflow: 'visible' }}
+            >
+              {/* Definitions for Gradients */}
+              <defs>
+                <linearGradient id="baselineBarGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#38bdf8" />
+                  <stop offset="100%" stopColor="#0284c7" />
+                </linearGradient>
+                <linearGradient id="baggingBarGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#c084fc" />
+                  <stop offset="100%" stopColor="#8b5cf6" />
+                </linearGradient>
+                <linearGradient id="boostingBarGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#fde047" />
+                  <stop offset="100%" stopColor="#d97706" />
+                </linearGradient>
+              </defs>
+
+              {/* Y-Axis Gridlines & Ticks (0%, 25%, 50%, 75%, 100%) */}
+              {[0, 25, 50, 75, 100].map(tick => {
+                const yPos = 30 + 295 - (tick / 100) * 295;
+                return (
+                  <g key={tick}>
+                    <line 
+                      x1={58} 
+                      y1={yPos} 
+                      x2={58 + 832} 
+                      y2={yPos} 
+                      stroke={tick === 0 ? "rgba(148, 163, 184, 0.25)" : "rgba(148, 163, 184, 0.10)"} 
+                      strokeDasharray={tick === 0 ? "none" : "4 4"} 
+                      strokeWidth={tick === 0 ? 1.5 : 1}
+                    />
+                    <text 
+                      x={46} 
+                      y={yPos + 4} 
+                      textAnchor="end" 
+                      fill="#64748b" 
+                      fontSize={12} 
+                      fontFamily="var(--font-mono)"
+                    >
+                      {tick}%
+                    </text>
+                  </g>
+                );
+              })}
+
+              {/* 4 Metric Clusters: Accuracy, Precision, Recall, F1-Score */}
+              {[
+                { key: 'accuracy', label: 'Accuracy' },
+                { key: 'precision', label: 'Precision' },
+                { key: 'recall', label: 'Recall' },
+                { key: 'f1_score', label: 'F1-Score' },
+              ].map((metric, cIdx) => {
+                const slotW = 832 / 4;
+                const clusterCenter = 58 + (cIdx + 0.5) * slotW;
+                const startX = 58 + cIdx * slotW + (slotW - 122) / 2;
+
+                const compModels = [
+                  modelsList.find(m => m.type === "Baseline" || m.model.includes("Logistic")) || defaultModelsList[0],
+                  modelsList.find(m => m.type === "Bagging" || m.model.includes("Forest")) || defaultModelsList[1],
+                  modelsList.find(m => m.type === "Boosting" || m.model.includes("AdaBoost")) || defaultModelsList[2],
+                ];
+
+                return (
+                  <g key={metric.key}>
+                    {/* X-Axis Metric Label */}
+                    <text 
+                      x={clusterCenter} 
+                      y={30 + 295 + 32} 
+                      textAnchor="middle" 
+                      fill="#e2e8f0" 
+                      fontSize={14} 
+                      fontWeight={700}
+                      letterSpacing="0.01em"
+                    >
+                      {metric.label}
+                    </text>
+
+                    {/* 3 Model Bars within this Metric */}
+                    {compModels.map((m, bIdx) => {
+                      const barW = 34;
+                      const barX = startX + bIdx * (34 + 10);
+                      const rawVal = Number(m[metric.key] ?? 0);
+                      const val = Math.min(100, Math.max(0, rawVal));
+                      const barH = (val / 100) * 295;
+                      const barY = 30 + 295 - barH;
+                      const barId = `${metric.key}-${m.model}`;
+                      const isHovered = hoveredCompareBar?.barId === barId;
+                      const barColor = bIdx === 0 ? "#38bdf8" : bIdx === 1 ? "#a78bfa" : "#fbbf24";
+                      const fillGrad = bIdx === 0 ? "url(#baselineBarGrad)" : bIdx === 1 ? "url(#baggingBarGrad)" : "url(#boostingBarGrad)";
+
+                      return (
+                        <g key={m.model}>
+                          <rect
+                            x={barX}
+                            y={barY}
+                            width={barW}
+                            height={Math.max(3, barH)}
+                            rx={6}
+                            ry={6}
+                            fill={fillGrad}
+                            style={{
+                              cursor: 'pointer',
+                              transition: 'all 0.18s ease',
+                              filter: isHovered 
+                                ? `drop-shadow(0 0 12px ${barColor}99) brightness(1.2)` 
+                                : hoveredCompareBar 
+                                  ? 'opacity(0.35)' 
+                                  : 'none',
+                            }}
+                            onMouseEnter={() => {
+                              setHoveredCompareBar({
+                                barId,
+                                model: m.model,
+                                type: m.type,
+                                metric: metric.label,
+                                val: val.toFixed(1),
+                                color: barColor,
+                                svgX: barX + barW / 2,
+                                svgY: barY,
+                              });
+                            }}
+                            onMouseLeave={() => setHoveredCompareBar(null)}
+                          />
+
+                          {/* Static subtle top highlight on winner bars (Random Forest) */}
+                          {m.type === "Bagging" && (
+                            <circle 
+                              cx={barX + barW / 2} 
+                              cy={barY - 8} 
+                              r={3} 
+                              fill="#c084fc" 
+                              opacity={0.8}
+                            />
+                          )}
+                        </g>
+                      );
+                    })}
+                  </g>
+                );
+              })}
+
+              {/* Hover Floating Value Tooltip inside SVG */}
+              {hoveredCompareBar && (
+                <g style={{ pointerEvents: 'none' }}>
+                  <rect 
+                    x={hoveredCompareBar.svgX - 45} 
+                    y={Math.max(6, hoveredCompareBar.svgY - 34)} 
+                    width={90} 
+                    height={26} 
+                    rx={6} 
+                    fill="#0f172a" 
+                    stroke={hoveredCompareBar.color} 
+                    strokeWidth={1.5}
+                    filter="drop-shadow(0 6px 12px rgba(0,0,0,0.6))"
+                  />
+                  <text 
+                    x={hoveredCompareBar.svgX} 
+                    y={Math.max(6, hoveredCompareBar.svgY - 34) + 17} 
+                    textAnchor="middle" 
+                    fill="#ffffff" 
+                    fontSize={12} 
+                    fontWeight={800} 
+                    fontFamily="var(--font-mono)"
+                  >
+                    {hoveredCompareBar.val}%
+                  </text>
+                </g>
+              )}
+            </svg>
+          </div>
+
+          {/* Key Findings Bullet List (exact match to presentation slide) */}
+          <div style={{
+            marginTop: '1.2rem',
+            paddingTop: '1.1rem',
+            borderTop: '1px solid #1a2336',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            fontSize: '0.88rem',
+            color: '#94a3b8'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#a78bfa', flexShrink: 0 }} />
+              <span>
+                <strong style={{ color: '#ffffff' }}>Random Forest (Bagging)</strong> scores highest on Accuracy, Precision, Recall and F1-Score.
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#38bdf8', flexShrink: 0 }} />
+              <span>
+                Baseline is <strong style={{ color: '#cbd5e1' }}>Logistic Regression</strong> and Boosting is <strong style={{ color: '#cbd5e1' }}>AdaBoost</strong>.
+              </span>
+            </div>
+          </div>
+        </div>
+
 
         {/* ------------------------------------------------------------ */}
         {/* ROW 1: 1. ROC CURVE & 2. AUC SCORE COMPARISON                */}

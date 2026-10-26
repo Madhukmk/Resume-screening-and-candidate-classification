@@ -17,6 +17,8 @@ flask-cors>=4.0
 # project automatically falls back to a high-quality synthetic generator.
 datasets>=2.14
 
-# Optional: resume file (PDF/DOCX) parsing in the UI
+# Optional: resume file (PDF/DOCX) parsing and demo PDF generation
 pdfplumber>=0.9
 python-docx>=0.8.11
+reportlab>=4.0
+

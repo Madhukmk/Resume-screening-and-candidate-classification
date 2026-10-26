@@ -34,4 +34,8 @@ if __name__ == "__main__":
     # Import here so the dependency check runs first with a clean message.
     from train import main
     main()
-    print("\nNext step: launch the UI with\n    streamlit run app.py")
+    print("\nNext step: launch the MATCHIX Full-Stack Web Application with:")
+    print("    run.bat               (Interactive Launcher)")
+    print("    run_fullstack.bat     (Direct Full-Stack Launch: Flask + Vite React)")
+    print("    python server.py      (Backend REST API on http://localhost:5000)")
+

@@ -73,35 +73,47 @@ Job Representation ────────────────────�
 
 ```
 Resume screening and candidate classification/
-├── server.py               # Flask REST API backend server
+├── server.py               # Flask REST API backend server (port 5000)
 ├── run_fullstack.bat       # One-click launcher for frontend + backend
-├── run.bat                 # Interactive Windows launcher menu
+├── run.bat                 # Unified interactive Windows launcher menu
+├── run_pipeline.py         # Full ML pipeline runner & dependency check
 ├── check.bat               # Direct diagnostic health check batch file
 ├── health_check.py         # Automated end-to-end system verification
 ├── smoke_test.py           # Unit and pipeline smoke tests
-├── config.py               # Paths, weights, and hyperparameters
+├── config.py               # Central paths, weights, and hyperparameters
 ├── requirements.txt        # Python package dependencies
 ├── frontend/               # Modern React + Vite Web UI (Port 5173)
-│   ├── src/                # Components (Dashboard, Pipeline Architecture, etc.)
-│   └── package.json
+│   ├── src/                # Components (Dashboard, DeepMatch, BatchScreening, etc.)
+│   ├── package.json        # Frontend dependencies
+│   └── dist/               # Pre-built production frontend bundle
 ├── data/
 │   ├── dataset_profile.json # Comprehensive JSON profile of the synthetic dataset
-│   ├── raw/                 # Downloaded raw parquet files (resumes, jobs, matches)
-│   └── processed/           # Normalized candidates.parquet, jobs.parquet, matches.parquet
+│   ├── raw/                 # Raw dataset CSV files (resumes.csv, jobs.csv, matches.csv)
+│   └── processed/           # Normalized candidates.csv, jobs.csv, matches.csv
 ├── models/
 │   ├── skills_vocab.json    # Complete 73-skill lexicon
 │   ├── matching_vectorizer.joblib  # Trained TF-IDF feature extractor
-│   └── candidate_tfidf.joblib      # Precomputed candidate matrix (10k resumes)
+│   ├── candidate_tfidf.joblib      # Precomputed candidate matrix (10k resumes)
+│   └── *.joblib             # Classifier models (Random Forest, Logistic Regression, etc.)
+├── ml/
+│   └── evaluate_models.py  # 3-model comparative evaluation (ROC curves, AUC, CM)
 ├── outputs/
 │   ├── matching_benchmark.json     # Quantitative IR evaluation metrics
-│   ├── matching_benchmark.csv
+│   ├── models_benchmark.json       # Classifier benchmark results
 │   ├── retrieval_metrics_bars.png  # Retrieval performance chart
 │   └── score_distribution.png      # Score distribution visualization
+├── sample_resumes/         # 15 realistic demo candidate PDFs & 1 target JD PDF
+├── scripts/
+│   ├── generate_demo_pdfs.py       # Script to generate realistic demo PDFs
+│   └── test_screening_demo.py      # Automated terminal screening runner for demo PDFs
 └── src/
     ├── preprocessing.py    # Schema normalizers & text cleaners
     ├── data_loader.py      # Dataset loader & processor
     ├── matching_engine.py  # Dual-branch matching engine & ranking logic
     ├── benchmark.py        # IR evaluation & visualization generator
+    ├── visualize.py        # Model comparison chart generators
+    ├── models.py           # Classifier model definitions
+    ├── ranking.py          # Candidate ranking utilities
     └── file_utils.py       # PDF/DOCX/TXT extraction
 ```
 
@@ -111,13 +123,14 @@ Resume screening and candidate classification/
 
 ### ⚡ One-Click Run (Windows)
 Double-click **`run.bat`** (or execute `.\run.bat` in Command Prompt / PowerShell) to open the interactive menu:
-- `[1]` Run System Health & Diagnostics Check
-- `[2]` Launch Web Application (Streamlit UI)
-- `[3]` Run Quick Smoke Test
+- `[1]` Launch MATCHIX Full-Stack Web Application (localhost:5173)
+- `[2]` Run System Health Check
+- `[3]` Run Project Smoke Tests
 - `[4]` Run Ground-Truth Benchmark Evaluation (75,000 Pairs)
 - `[5]` Install / Update Dependencies
+- `[6]` Exit
 
-Or run **`check.bat`** anytime for an instant operational check.
+Or double-click **`run_fullstack.bat`** to start both the Flask backend and Vite React frontend automatically!
 
 ---
 
@@ -126,6 +139,7 @@ Or run **`check.bat`** anytime for an instant operational check.
 1. **Install Dependencies**:
    ```bash
    pip install -r requirements.txt
+   cd frontend && npm install && cd ..
    ```
 
 2. **Prepare Normalized Dataset**:
@@ -133,13 +147,22 @@ Or run **`check.bat`** anytime for an instant operational check.
    python -m src.data_loader
    ```
 
-3. **Run Benchmark Evaluation**:
+3. **Run Benchmark Evaluation & Tests**:
    ```bash
+   python health_check.py
+   python smoke_test.py
    python -m src.benchmark
+   python -m ml.evaluate_models
    ```
 
-4. **Launch Web Application**:
-   ```bash
-   streamlit run app.py
-   ```
-   Access the UI at `http://localhost:8501`.
+4. **Launch Application**:
+   - Backend API:
+     ```bash
+     python server.py
+     ```
+     Access API / production UI at `http://localhost:5000`.
+   - Frontend Dev Server (optional):
+     ```bash
+     cd frontend && npm run dev
+     ```
+     Access live interactive UI at `http://localhost:5173`.

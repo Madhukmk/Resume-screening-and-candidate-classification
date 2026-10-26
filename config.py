@@ -30,20 +30,36 @@ DATASET_PROFILE_JSON = DATA_DIR / "dataset_profile.json"
 # Artifacts
 SKILLS_VOCAB_PATH = MODELS_DIR / "skills_vocab.json"
 VECTORIZER_PATH = MODELS_DIR / "matching_vectorizer.joblib"
+TFIDF_VECTORIZER_PATH = MODELS_DIR / "tfidf_vectorizer.joblib"
+LABEL_ENCODER_PATH = MODELS_DIR / "label_encoder.joblib"
 CANDIDATE_TFIDF_MATRIX_PATH = MODELS_DIR / "candidate_tfidf.joblib"
+
+# Model Checkpoints
+MODEL_FILES = {
+    "Linear SVM": MODELS_DIR / "linear_svm.joblib",
+    "Logistic Regression": MODELS_DIR / "logistic_regression.joblib",
+    "Random Forest": MODELS_DIR / "random_forest.joblib",
+    "Multinomial Naive Bayes": MODELS_DIR / "multinomial_nb.joblib",
+    "AdaBoost": MODELS_DIR / "adaboost.joblib",
+}
+DEFAULT_UI_MODEL = "Linear SVM"
 
 # Evaluation Outputs
 BENCHMARK_JSON = OUTPUTS_DIR / "matching_benchmark.json"
 BENCHMARK_CSV = OUTPUTS_DIR / "matching_benchmark.csv"
+METRICS_CSV = OUTPUTS_DIR / "metrics.csv"
+METRICS_JSON = OUTPUTS_DIR / "metrics.json"
+MODELS_BENCHMARK_JSON = OUTPUTS_DIR / "models_benchmark.json"
 
 # Ensure directories exist
 for _d in (DATA_DIR, RAW_DATA_DIR, PROCESSED_DATA_DIR, MODELS_DIR, OUTPUTS_DIR):
     _d.mkdir(parents=True, exist_ok=True)
 
 # ----------------------------------------------------------------------------
-# Matching Hyperparameters
+# Matching & Training Hyperparameters
 # ----------------------------------------------------------------------------
 RANDOM_STATE = 42
+TEST_SIZE = 0.2
 
 # TF-IDF representation settings
 TFIDF_MAX_FEATURES = 10000
